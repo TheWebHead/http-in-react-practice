@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import axios from '../../axios';
 
 import Post from '../../components/Post/Post';
 import FullPost from '../../components/FullPost/FullPost';
@@ -12,11 +12,12 @@ class Blog extends Component {
     
     state = {
         posts: [],
-        selectedPostId: null
+        selectedPostId: null,
+        error: false
     }
 
     componentDidMount () {
-        axios.get('https://jsonplaceholder.typicode.com/posts')
+        axios.get('/posts')
         .then(response => {
             const posts = response.data.slice(0, 4);
             const updatedPosts = posts.map( post => {
@@ -28,14 +29,12 @@ class Blog extends Component {
             this.setState({posts: updatedPosts});
             console.log(response);
         })
-    }
-
-    componentDidUpdate () {
-        this.setState( prevState => {
-            
+        .catch( error => {
+            this.setState({error: true})
         })
     }
 
+    
     postSelectedHandler ( id ) {
         this.setState({
             selectedPostId: id
@@ -43,18 +42,22 @@ class Blog extends Component {
     }
 
     render () {
-        const posts = this.state.posts.map(post => {
+        let posts = <p style={{textAlign: 'center'}}>Something went wrong</p>;
+        if(!this.state.error){
+            posts = this.state.posts.map(post => {
 
-            return <Post 
-                    title={post.title} 
-                    key={post.id}
-                    body={post.body}
-                    author={post.author}
-                    clicked={() => this.postSelectedHandler(post.id)}
-            
-            />
-            console.log(posts);
-        });
+                return <Post 
+                        title={post.title} 
+                        key={post.id}
+                        body={post.body}
+                        author={post.author}
+                        clicked={() => this.postSelectedHandler(post.id)}
+                
+                />
+                console.log(posts);
+            })
+        }
+        
         return (
             <div>
                 <section className="Posts">
